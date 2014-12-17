@@ -56,7 +56,7 @@ def main():
    def log_quiet(fmt,*args, **kwds):
        logger.log(logging.SUMMARY,fmt,*args,**kwds)
    
-   level = logging.WARNING # log warnings, errors and quiet messages
+   level = logging.INFO # log warnings, errors and quiet messages
 
    if args.quiet:
        level = logging.ERROR

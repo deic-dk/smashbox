@@ -103,6 +103,26 @@ def oc_webdav_url(protocol='http',remote_folder=""):
 # this is a local variable for each worker that keeps track of the repeat count for the current step
 ocsync_cnt = {}
 
+def oc_webdav_url_raw(protocol='http',remote_folder=""):
+  """ Protocol for sync client should be set to 'owncloud'. Protocol for generic webdav clients is http.
+  """
+      
+  if config.oc_ssl_enabled:
+      protocol += 's'
+
+      
+  remote_folder = remote_folder.lstrip('/') # strip-off any leading / characters to prevent 1) abspath result from the join below, 2) double // and alike...
+
+  remote_path = os.path.join(config.oc_webdav_endpoint,config.oc_server_folder,remote_folder)
+
+  #remote_path = os.path.join('owncloud/remote.php/webdav',remote_folder)  # this is for standard owncloud 
+
+  return protocol+('://%(oc_server)s/'%config)+remote_path
+
+
+# this is a local variable for each worker that keeps track of the repeat count for the current step
+ocsync_cnt = {}
+
 def run_ocsync(local_folder,remote_folder="",N=None):
     """ Run the ocsync for local_folder against remote_folder (or the main folder on the owncloud account if remote_folder is None).
     Repeat the sync N times. If N not given then N -> config.oc_sync_repeat (default 1).
@@ -120,7 +140,7 @@ def run_ocsync(local_folder,remote_folder="",N=None):
 
     for i in range(N):
         t0 = datetime.datetime.now()
-        cmd = config.oc_sync_cmd+' '+local_folder+' '+oc_webdav_url('owncloud',remote_folder)+" >> "+ config.rundir+"/%s-ocsync.step%02d.cnt%03d.log 2>&1"%(reflection.getProcessName(),current_step,ocsync_cnt[current_step])
+        cmd = config.oc_sync_cmd+' --user '+config.oc_account_name+' --password '+config.oc_account_password+' '+local_folder+' '+oc_webdav_url_raw('owncloud',remote_folder)+" >> "+ config.rundir+"/%s-ocsync.step%02d.cnt%03d.log 2>&1"%(reflection.getProcessName(),current_step,ocsync_cnt[current_step])
         runcmd(cmd,ignore_exitcode=True) # exitcode of ocsync is not reliable
         logger.info('sync finished: %s',datetime.datetime.now()-t0)
         ocsync_cnt[current_step]+=1
