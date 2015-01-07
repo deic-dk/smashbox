@@ -21,7 +21,7 @@ config.ignored_files = ['.csync_journal.db']
 # control memory usage of functions reading/generating files
 BLOCK_SIZE = 1024*1024
 
-import os
+import os, sys
 import fnmatch
 
 def count_files(wdir,filemask=None):
@@ -112,6 +112,8 @@ def create_hashfile(wdir,filemask=None,size=None,bs=None,slow_write=None):
 
     f.write(block_data_r)
     f.close()
+    
+    logger.info('wrote file %s, %d, %d',fn, size, bs)
     
     return fn
 

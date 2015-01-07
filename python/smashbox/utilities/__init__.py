@@ -34,6 +34,7 @@ def reset_owncloud_account(reset_procedure=None):
         webdav_delete('/') # FIXME: workaround current bug in EOS (https://savannah.cern.ch/bugs/index.php?104661) 
 
     # if create if does not exist (for keep or webdav_delete options)
+    webdav_delete('/')
     webdav_mkcol('/') 
 
 def reset_rundir(reset_procedure=None):
@@ -148,16 +149,16 @@ def run_ocsync(local_folder,remote_folder="",N=None):
 
 
 def webdav_propfind_ls(path):
-    runcmd('curl -s -k -XPROPFIND %s | xmllint --format -'%oc_webdav_url(remote_folder=path))
+    runcmd('curl -s -k -u %s:%s -XPROPFIND %s | xmllint --format -'%(config.oc_account_name,config.oc_account_password,oc_webdav_url_raw(remote_folder=path)))
 
 def webdav_delete(path):
-    runcmd('curl -k -X DELETE %s '%oc_webdav_url(remote_folder=path))
+    runcmd('curl -k -u %s:%s -X DELETE %s '%(config.oc_account_name,config.oc_account_password,oc_webdav_url_raw(remote_folder=path)))
 
 def webdav_mkcol(path,silent=False):
     out=""
     if silent: # a workaround for super-verbose errors in case directory on the server already exists
         out = "> /dev/null 2>&1"
-    runcmd('curl -k -X MKCOL %s %s'%(oc_webdav_url(remote_folder=path),out))
+    runcmd('curl -k -u %s:%s -X MKCOL %s %s'%(config.oc_account_name,config.oc_account_password,oc_webdav_url_raw(remote_folder=path),out))
                    
 
 ##### SHELL COMMANDS AND TIME FUNCTIONS
